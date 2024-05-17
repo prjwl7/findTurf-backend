@@ -1,0 +1,7 @@
+id,name,team,league,type,home_away_third,size,number_of_jerseys,price,customizable,discounted_price
+1,John Doe,Team A,League 1,Type 1,Home,M,10,99.99,True,89.99
+2,Jane Smith,Team B,League 2,Type 2,Away,L,15,109.99,False,99.99
+3,Mike Johnson,Team C,League 3,Type 3,Third,S,8,79.99,True,69.99
+4,Emily Davis,Team D,League 4,Type 4,Home,XL,12,119.99,True,109.99
+5,John Doe,Team A,League 1,Type 1,Home,M,10,99.99,True,89.99
+6,John Doe,Team A,League 1,Type 1,Home,M,10,99.99,True,89.99
