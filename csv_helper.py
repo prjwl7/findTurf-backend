@@ -8,15 +8,14 @@ def read_csv():
         reader = csv.DictReader(file)
         return [row for row in reader]
 
-def write_csv(data):
-    fieldnames = ['id', 'name', 'team', 'league', 'type', 'home_away_third', 'size', 'number_of_jerseys', 'price', 'customizable', 'discounted_price']
-    with open(CSV_FILE_PATH, mode='w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(data)
-
 def append_to_csv(row):
-    fieldnames = ['id', 'name', 'team', 'league', 'type', 'home_away_third', 'size', 'number_of_jerseys', 'price', 'customizable', 'discounted_price']
-    with open(CSV_FILE_PATH, mode='a', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
+    with open('jerseys.csv', 'a', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=row.keys())
         writer.writerow(row)
+
+def write_csv(rows):
+    if rows:
+        with open('jerseys.csv', 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=rows[0].keys())
+            writer.writeheader()
+            writer.writerows(rows)
