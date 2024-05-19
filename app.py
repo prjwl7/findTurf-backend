@@ -13,7 +13,7 @@ db = client['findTurf']
 collection = db['Cluster0']
 
 # MySQL Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:prajwal2708@localhost/findturf'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://sql12707487:NdNVc1wexA@sql12.freesqldatabase.com/sql12707487'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db_sql = SQLAlchemy(app)
 
