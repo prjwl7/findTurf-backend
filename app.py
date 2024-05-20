@@ -25,9 +25,11 @@ from models import Jersey, Orders
 from routes.jersey_routes import jersey_routes
 from routes.orders_routes import orders_routes
 from routes.mongo_routes import mongo_routes
+from routes.booking_routes import booking_routes
 
 app.register_blueprint(jersey_routes)
 app.register_blueprint(orders_routes)
+app.register_blueprint(booking_routes)
 app.register_blueprint(mongo_routes)
 
 # Create tables if they don't exist

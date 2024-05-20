@@ -51,3 +51,30 @@ class Orders(db.Model):
         self.quantity = quantity
         self.amount = amount
         self.address = address
+
+class Booking(db.Model):
+    __tablename__ = 'booking'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    phoneNumber = db.Column(db.String(20), nullable=False)
+    turf = db.Column(db.String(80), nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    hours = db.Column(db.Integer, nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    type = db.Column(db.String(50), nullable=False)
+
+    def __init__(self, name, email, phoneNumber, turf, location, date, hours, amount, type):
+        self.name = name
+        self.email = email
+        self.phoneNumber = phoneNumber
+        self.turf = turf
+        self.location = location
+        self.date = date
+        self.hours = hours
+        self.amount = amount
+        self.type = type        
+
+

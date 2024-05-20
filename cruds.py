@@ -1,4 +1,4 @@
-from models import db, Jersey, Orders
+from models import db, Jersey, Orders, Booking
 from csv_helper import append_to_csv, write_csv
 
 # CRUD Operations for Jersey
@@ -163,3 +163,67 @@ def delete_order(order_id):
     db.session.commit()
     
     return order
+
+# CRUD Operations for Booking
+def create_booking(data):
+    name = data.get('name')
+    email = data.get('email')
+    phoneNumber = data.get('phoneNumber')
+    turf = data.get('turf')
+    location = data.get('location')
+    date = data.get('date')
+    hours = data.get('hours')
+    amount = data.get('amount')
+    type = data.get('type')
+    
+    if not (name and email and phoneNumber and turf and location and date and hours and amount and type):
+        raise ValueError("Incomplete data")
+    
+    new_booking = Booking(
+        name=name,
+        email=email,
+        phoneNumber=phoneNumber,
+        turf=turf,
+        location=location,
+        date=date,
+        hours=hours,
+        amount=amount,
+        type=type
+    )
+    
+    db.session.add(new_booking)
+    db.session.commit()
+    
+    return new_booking
+
+def get_bookings():
+    return Booking.query.all()
+
+def update_booking(booking_id, data):
+    booking = Booking.query.get(booking_id)
+    if not booking:
+        raise ValueError("Booking not found")
+    
+    booking.name = data.get('name', booking.name)
+    booking.email = data.get('email', booking.email)
+    booking.phoneNumber = data.get('phoneNumber', booking.phoneNumber)
+    booking.turf = data.get('turf', booking.turf)
+    booking.location = data.get('location', booking.location)
+    booking.date = data.get('date', booking.date)
+    booking.hours = data.get('hours', booking.hours)
+    booking.amount = data.get('amount', booking.amount)
+    booking.type = data.get('type', booking.type)
+    
+    db.session.commit()
+    
+    return booking
+
+def delete_booking(booking_id):
+    booking = Booking.query.get(booking_id)
+    if not booking:
+        raise ValueError("Booking not found")
+    
+    db.session.delete(booking)
+    db.session.commit()
+    
+    return booking
