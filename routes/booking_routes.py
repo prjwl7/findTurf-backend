@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from cruds import create_booking, get_bookings, update_booking, delete_booking
-
+from models import Booking
 booking_routes = Blueprint('booking_routes', __name__)
 
 @booking_routes.route('/api/bookings', methods=['POST'])
@@ -48,3 +48,27 @@ def remove_booking(booking_id):
         return jsonify({'message': 'Booking deleted successfully', 'booking': deleted_booking.id}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+
+@booking_routes.route('/api/bookings/email/<string:email>', methods=['GET'])
+def get_bookings_by_email(email):
+    try:
+        bookings = Booking.query.filter_by(email=email).all()
+        if not bookings:
+            return jsonify({'message': 'No bookings found for this email'}), 404
+
+        bookings_list = [{
+            'id': booking.id,
+            'name': booking.name,
+            'email': booking.email,
+            'phoneNumber': booking.phoneNumber,
+            'turf': booking.turf,
+            'location': booking.location,
+            'date': booking.date.strftime('%Y-%m-%d'),
+            'hours': booking.hours,
+            'amount': booking.amount,
+            'type': booking.type
+        } for booking in bookings]
+        return jsonify(bookings_list), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
