@@ -1,288 +1,50 @@
-from flask import Flask, request, jsonify
+import logging
+from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from pymongo import MongoClient
-import socket
-from csv_helper import append_to_csv, write_csv
+from database import db
+# Create Flask application
 app = Flask(__name__)
 CORS(app)
 
-# MongoDB Configuration
-client = MongoClient('mongodb+srv://prajwal1105:prajwal1105@cluster0.6dkonu9.mongodb.net/')
-db = client['findTurf']
-collection = db['Cluster0']
-
 # MySQL Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://sql12707487:NdNVc1wexA@sql12.freesqldatabase.com/sql12707487'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://sql12707487:NdNVc1wexA@sql12.freesqldatabase.com:3306/sql12707487'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db_sql = SQLAlchemy(app)
+app.config['SQLALCHEMY_ECHO'] = True  # Enable SQL query logging
+db.init_app(app)
 
-# Define Jersey Model
-# Updated Jersey Model
-class Jersey(db_sql.Model):
-    __tablename__ = 'jersey'
-    id = db_sql.Column(db_sql.Integer, primary_key=True, index=True)
-    name = db_sql.Column(db_sql.String(80), nullable=False)
-    team = db_sql.Column(db_sql.String(120), nullable=False, index=True)
-    league = db_sql.Column(db_sql.String(120))
-    type = db_sql.Column(db_sql.String(120))
-    home_away_third = db_sql.Column(db_sql.String(120))
-    sizes = db_sql.Column(db_sql.String(120))  # Store sizes as a comma-separated string
-    number_of_jerseys = db_sql.Column(db_sql.Integer)
-    price = db_sql.Column(db_sql.Float)
-    customizable = db_sql.Column(db_sql.Boolean)
-    discounted_price = db_sql.Column(db_sql.Float)
-    image_url = db_sql.Column(db_sql.String(255))  # Field to store image URL
 
-    def __init__(self, name, team, league, type, home_away_third, sizes, number_of_jerseys, price, customizable, discounted_price, image_url):
-        self.name = name
-        self.team = team
-        self.league = league
-        self.type = type
-        self.home_away_third = home_away_third
-        self.sizes = sizes
-        self.number_of_jerseys = number_of_jerseys
-        self.price = price
-        self.customizable = customizable
-        self.discounted_price = discounted_price
-        self.image_url = image_url
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
-# Create the database tables
+# Import models
+from models import Jersey, Orders
+
+# Import and register blueprints
+from routes.jersey_routes import jersey_routes
+from routes.orders_routes import orders_routes
+from routes.mongo_routes import mongo_routes
+
+app.register_blueprint(jersey_routes)
+app.register_blueprint(orders_routes)
+app.register_blueprint(mongo_routes)
+
+# Create tables if they don't exist
 with app.app_context():
-    db_sql.create_all()
+    logger.debug("Creating database tables if they don't exist...")
+    db.create_all()
+    logger.debug("Tables created.")
 
-# CRUD Operations
-def create_jersey(data):
-    name = data.get('name')
-    team = data.get('team')
-    league = data.get('league')
-    type = data.get('type')
-    home_away_third = data.get('home_away_third')
-    sizes = ','.join(data.get('sizes'))  # Convert list of sizes to a comma-separated string
-    number_of_jerseys = data.get('number_of_jerseys')
-    price = data.get('price')
-    customizable = data.get('customizable')
-    discounted_price = data.get('discounted_price')
-    image_url = data.get('image_url')
-    
-    if not (name and team and league and type and home_away_third and sizes and number_of_jerseys and price and customizable is not None and discounted_price and image_url):
-        raise ValueError("Incomplete data")
-    
-    new_jersey = Jersey(
-        name=name,
-        team=team,
-        league=league,
-        type=type,
-        home_away_third=home_away_third,
-        sizes=sizes,
-        number_of_jerseys=number_of_jerseys,
-        price=price,
-        customizable=customizable,
-        discounted_price=discounted_price,
-        image_url=image_url
-    )
-    
-    db_sql.session.add(new_jersey)
-    db_sql.session.commit()
-    
-    row = {
-        'id': new_jersey.id,
-        'name': name,
-        'team': team,
-        'league': league,
-        'type': type,
-        'home_away_third': home_away_third,
-        'sizes': sizes,
-        'number_of_jerseys': number_of_jerseys,
-        'price': price,
-        'customizable': customizable,
-        'discounted_price': discounted_price,
-        'image_url': image_url
-    }
-    append_to_csv(row)
-    
-    return new_jersey
-
-def update_jersey(jersey_id, data):
-    jersey = Jersey.query.get(jersey_id)
-    if not jersey:
-        raise ValueError("Jersey not found")
-    
-    jersey.name = data.get('name', jersey.name)
-    jersey.team = data.get('team', jersey.team)
-    jersey.league = data.get('league', jersey.league)
-    jersey.type = data.get('type', jersey.type)
-    jersey.home_away_third = data.get('home_away_third', jersey.home_away_third)
-    jersey.sizes = ','.join(data.get('sizes', jersey.sizes.split(','))) 
-    jersey.number_of_jerseys = data.get('number_of_jerseys', jersey.number_of_jerseys)
-    jersey.price = data.get('price', jersey.price)
-    jersey.customizable = data.get('customizable', jersey.customizable)
-    jersey.discounted_price = data.get('discounted_price', jersey.discounted_price)
-    jersey.image_url = data.get('image_url', jersey.image_url)
-    
-    db_sql.session.commit()
-    jerseys = get_jerseys()
-    jerseys_list = [{
-        'id': j.id,
-        'name': j.name,
-        'team': j.team,
-        'league': j.league,
-        'type': j.type,
-        'home_away_third': j.home_away_third,
-        'sizes': j.sizes,
-        'number_of_jerseys': j.number_of_jerseys,
-        'price': j.price,
-        'customizable': j.customizable,
-        'discounted_price': j.discounted_price,
-        'image_url': j.image_url
-    } for j in jerseys]
-    write_csv(jerseys_list)
-    
-    return jersey
-
-def get_jerseys():
-    return Jersey.query.all()
-
-def delete_jersey(jersey_id):
-    jersey = Jersey.query.get(jersey_id)
-    if not jersey:
-        raise ValueError("Jersey not found")
-    
-    db_sql.session.delete(jersey)
-    db_sql.session.commit()
-    
-    # Update CSV file
-    jerseys = get_jerseys()
-    jerseys_list = [{
-        'id': j.id,
-        'name': j.name,
-        'team': j.team,
-        'league': j.league,
-        'type': j.type,
-        'home_away_third': j.home_away_third,
-        'sizes': j.sizes,
-        'number_of_jerseys': j.number_of_jerseys,
-        'price': j.price,
-        'customizable': j.customizable,
-        'discounted_price': j.discounted_price,
-        'image_url': j.image_url
-    } for j in jerseys]
-    write_csv(jerseys_list)
-    
-    return jersey
-
-# Flask Routes for CRUD Operations
-@app.route('/api/jerseys', methods=['POST'])
-def add_jersey():
+# Test query to verify table creation
+with app.app_context():
     try:
-        data = request.get_json()
-        new_jersey = create_jersey(data)
-        return jsonify({'message': 'Jersey added successfully', 'jersey': new_jersey.id}), 201
+        jersey_count = db.session.query(Jersey).count()
+        orders_count = db.session.query(Orders).count()
+        logger.debug(f"Jersey table has {jersey_count} entries.")
+        logger.debug(f"Orders table has {orders_count} entries.")
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-@app.route('/api/jerseys', methods=['GET'])
-def list_jerseys():
-    try:
-        jerseys = get_jerseys()
-        jerseys_list = [{
-            'id': j.id,
-            'name': j.name,
-            'team': j.team,
-            'league': j.league,
-            'type': j.type,
-            'home_away_third': j.home_away_third,
-            'sizes': j.sizes.split(','),  # Convert comma-separated string back to list
-            'number_of_jerseys': j.number_of_jerseys,
-            'price': j.price,
-            'customizable': j.customizable,
-            'discounted_price': j.discounted_price,
-            'image_url': j.image_url
-        } for j in jerseys]
-        return jsonify(jerseys_list), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/jerseys/<int:jersey_id>', methods=['PUT'])
-def modify_jersey(jersey_id):
-    try:
-        data = request.get_json()
-        updated_jersey = update_jersey(jersey_id, data)
-        return jsonify({'message': 'Jersey updated successfully', 'jersey': updated_jersey.id}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-@app.route('/api/jerseys/<int:jersey_id>', methods=['DELETE'])
-def remove_jersey(jersey_id):
-    try:
-        deleted_jersey = delete_jersey(jersey_id)
-        return jsonify({'message': 'Jersey deleted successfully', 'jersey': deleted_jersey.id}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-
-
-
-# Existing routes for MongoDB operations
-@app.route('/api/storeFormData', methods=['POST'])
-def store_form_data():
-    try:
-        data = request.get_json()
-        name = data.get('name')
-        email = data.get('email')
-        location = data.get('location')
-
-        if not (name and email and location):
-            return jsonify({'error': 'Incomplete form data'}), 400
-
-        result = collection.insert_one({'name': name, 'email': email, 'location': location})
-
-        return jsonify({'message': 'Form data stored successfully', 'id': str(result.inserted_id)}), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/checkEmailExists', methods=['POST'])
-def check_email_exists():
-    try:
-        data = request.get_json()
-        email = data.get('email')
-
-        user = collection.find_one({'email': email})
-        if user:
-            return jsonify({'exists': True})
-        else:
-            return jsonify({'exists': False})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/insertLocation', methods=['POST'])
-def insert_location():
-    try:
-        data = request.get_json()
-        phone_number = data.get('phoneNumber')
-        email = data.get('email')
-        location = data.get('location')
-
-        if not (email and location and phone_number):
-            return jsonify({'error': 'Incomplete data'}), 400
-
-        result = collection.update_one({'email': email}, {'$set': {'location': location, 'phone_number': phone_number}})
-
-        if result.modified_count > 0:
-            return jsonify({'message': 'Location updated successfully'})
-        else:
-            return jsonify({'message': 'Email not found'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/getIPAddress', methods=['GET'])
-def get_ip_address():
-    try:
-        hostname = socket.gethostname()
-        ip_address = socket.gethostbyname(hostname)
-        return jsonify({'ip': ip_address})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error querying tables: {e}")
 
 if __name__ == '__main__':
     app.run(debug=True)
