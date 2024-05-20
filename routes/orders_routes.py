@@ -8,7 +8,7 @@ def add_order():
     try:
         data = request.get_json()
         new_order = create_order(data)
-        return jsonify({'message': 'Order added successfully', 'order': new_order.id}), 201
+        return jsonify({'message': 'Order added successfully', 'order': new_order.id}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
