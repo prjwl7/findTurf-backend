@@ -15,7 +15,13 @@ def add_jersey():
 @jersey_routes.route('/api/jerseys', methods=['GET'])
 def list_jerseys():
     try:
-        jerseys = get_jerseys()
+        search = request.args.get('search', '')
+        sort_by = request.args.get('sort_by', '')
+        home_away_third = request.args.get('home_away_third', '')
+        team = request.args.get('team', '')
+        price = request.args.get('price', '')
+
+        jerseys = get_jerseys(search, sort_by, home_away_third, team, price)
         jerseys_list = [{
             'id': j.id,
             'name': j.name,
