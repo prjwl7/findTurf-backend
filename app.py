@@ -36,21 +36,21 @@ app.register_blueprint(mongo_routes)
 app.register_blueprint(user_routes)
 app.register_blueprint(turf_routes)
 
-# Create tables if they don't exist
-with app.app_context():
-    logger.debug("Creating database tables if they don't exist...")
-    db.create_all()
-    logger.debug("Tables created.")
+# # Create tables if they don't exist
+# with app.app_context():
+#     logger.debug("Creating database tables if they don't exist...")
+#     db.create_all()
+#     logger.debug("Tables created.")
 
-# Test query to verify table creation
-with app.app_context():
-    try:
-        jersey_count = db.session.query(Jersey).count()
-        orders_count = db.session.query(Order).count()
-        logger.debug(f"Jersey table has {jersey_count} entries.")
-        logger.debug(f"Orders table has {orders_count} entries.")
-    except Exception as e:
-        logger.error(f"Error querying tables: {e}")
+# # Test query to verify table creation
+# with app.app_context():
+#     try:
+#         jersey_count = db.session.query(Jersey).count()
+#         orders_count = db.session.query(Order).count()
+#         logger.debug(f"Jersey table has {jersey_count} entries.")
+#         logger.debug(f"Orders table has {orders_count} entries.")
+#     except Exception as e:
+#         logger.error(f"Error querying tables: {e}")
 
 if __name__ == '__main__':
     app.run(debug=True)
