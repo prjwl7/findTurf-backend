@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from cruds import create_jersey, get_jerseys, update_jersey, delete_jersey
+from cruds.jersey_crud import create_jersey, get_jerseys, update_jersey, delete_jersey
 
 jersey_routes = Blueprint('jersey_routes', __name__)
 

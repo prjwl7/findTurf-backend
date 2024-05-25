@@ -19,18 +19,22 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Import models
-from models import Jersey, Orders
+from models import Jersey, Order, Booking, Match, User ,Turf, TurfImage, Tournament, Result, Participation, OrderItem
 
 # Import and register blueprints
 from routes.jersey_routes import jersey_routes
-from routes.orders_routes import orders_routes
+from routes.orders_routes import order_routes
 from routes.mongo_routes import mongo_routes
 from routes.booking_routes import booking_routes
+from routes.user_routes import user_routes
+from routes.turf_routes import turf_routes
 
 app.register_blueprint(jersey_routes)
-app.register_blueprint(orders_routes)
+app.register_blueprint(order_routes)
 app.register_blueprint(booking_routes)
 app.register_blueprint(mongo_routes)
+app.register_blueprint(user_routes)
+app.register_blueprint(turf_routes)
 
 # Create tables if they don't exist
 with app.app_context():
@@ -42,7 +46,7 @@ with app.app_context():
 with app.app_context():
     try:
         jersey_count = db.session.query(Jersey).count()
-        orders_count = db.session.query(Orders).count()
+        orders_count = db.session.query(Order).count()
         logger.debug(f"Jersey table has {jersey_count} entries.")
         logger.debug(f"Orders table has {orders_count} entries.")
     except Exception as e:
