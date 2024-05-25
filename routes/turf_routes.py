@@ -22,6 +22,7 @@ def list_turfs():
             'TurfID': turf.TurfID,
             'name': turf.name,
             'location': turf.location,
+            'city' : turf.city,
             'charges': turf.charges,
             'availableTimeSlots': turf.availableTimeSlots,
             'image_urls': [image.ImageURL for image in turf.images]
@@ -40,6 +41,7 @@ def get_turf(turf_id):
             'TurfID': turf.TurfID,
             'name': turf.name,
             'location': turf.location,
+            'city' : turf.city,
             'charges': turf.charges,
             'availableTimeSlots': turf.availableTimeSlots,
             'image_urls': [image.ImageURL for image in turf.images]

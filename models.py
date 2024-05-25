@@ -136,6 +136,7 @@ class Turf(db.Model):
     TurfID = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
     location = Column(String(255), nullable=False)
+    city = Column(String(255), nullable=False)
     charges = Column(DECIMAL(precision=10, scale=2), nullable=False)
     availableTimeSlots = Column(Text)
 
@@ -143,9 +144,10 @@ class Turf(db.Model):
     images = relationship('TurfImage', back_populates='turf', cascade='all, delete-orphan')
     tournaments = relationship("Tournament", back_populates="turf")
 
-    def __init__(self, name, location, charges, availableTimeSlots):
+    def __init__(self, name, location, city, charges, availableTimeSlots):
         self.name = name
         self.location = location
+        self.city = city
         self.charges = charges
         self.availableTimeSlots = availableTimeSlots
 

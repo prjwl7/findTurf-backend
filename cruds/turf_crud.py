@@ -6,6 +6,7 @@ def create_turf(data):
     new_turf = Turf(
         name=data['name'],
         location=data['location'],
+        city=data['city'],
         charges=data['charges'],
         availableTimeSlots=data['availableTimeSlots']
     )
@@ -30,6 +31,7 @@ def update_turf(turf_id, data):
 
     turf.name = data.get('name', turf.name)
     turf.location = data.get('location', turf.location)
+    turf.city = data.get('city', turf.city)
     turf.charges = data.get('charges', turf.charges)
     turf.availableTimeSlots = data.get('availableTimeSlots', turf.availableTimeSlots)
 
