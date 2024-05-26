@@ -11,9 +11,10 @@ def create_order(user_id, total_price, status, order_items):
             OrderID=new_order.OrderID,
             ProductID=item['ProductID'],
             Quantity=item['Quantity'],
-            Price=item['Price'],
-            Status=item.get('Status', 'pending')  # Assuming default status is 'pending'
+            Price=item['Price']
         )
+        # Establish relationship between Order and OrderItem
+        new_order.order_items.append(new_order_item)
         db.session.add(new_order_item)
     
     db.session.commit()
