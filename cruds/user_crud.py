@@ -62,3 +62,7 @@ def delete_user(user_id):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise ValueError(f"Database error: {str(e)}")
+
+def get_user_by_email(email):
+    user = User.query.filter_by(Email=email).first()
+    return user
