@@ -7,7 +7,12 @@ order_routes = Blueprint('order_routes', __name__)
 def add_order():
     data = request.get_json()
     try:
-        new_order = create_order(data['UserID'], data['TotalPrice'], data['Status'])
+        user_id = data['UserID']
+        total_price = data['TotalPrice']
+        status = data['Status']
+        order_items = data['OrderItems']  # Get the order items from the request
+
+        new_order = create_order(user_id, total_price, status, order_items)
         return jsonify({'message': 'Order added successfully', 'order_id': new_order.OrderID}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400

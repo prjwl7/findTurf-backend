@@ -1,8 +1,21 @@
-from models import db, Order
+from models import db, Order, OrderItem
 
-def create_order(UserID, TotalPrice, Status):
-    new_order = Order(UserID=UserID, TotalPrice=TotalPrice, Status=Status)
+def create_order(user_id, total_price, status, order_items):
+    new_order = Order(UserID=user_id, TotalPrice=total_price, Status=status)
     db.session.add(new_order)
+    db.session.commit()
+
+    # Create OrderItems
+    for item in order_items:
+        new_order_item = OrderItem(
+            OrderID=new_order.OrderID,
+            ProductID=item['ProductID'],
+            Quantity=item['Quantity'],
+            Price=item['Price'],
+            Status=item.get('Status', 'pending')  # Assuming default status is 'pending'
+        )
+        db.session.add(new_order_item)
+    
     db.session.commit()
     return new_order
 
